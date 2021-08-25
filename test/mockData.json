@@ -1,0 +1,100 @@
+{
+    "Task": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "id": {
+                        "S": "IRFa-VaY2b"
+                    },
+                    "Name": {
+                        "S": "Cleaning floors"
+                    },
+                    "Time": {
+                        "N": "30"
+                    },
+                    "Frequency": {
+                        "N": "1"
+                    },
+                    "LastCompleteDate": {
+                        "S": "10/08/2021"
+                    },
+                    "Person": {
+                        "S": "Ricardo"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "id": {
+                        "S": "IRFa-VaY22"
+                    },
+                    "Name": {
+                        "S": "Cleaning doors"
+                    },
+                    "Time": {
+                        "N": "40"
+                    },
+                    "Frequency": {
+                        "N": "3"
+                    },
+                    "LastCompleteDate": {
+                        "S": "10/10/2021"
+                    },
+                    "Person": {
+                        "S": "Joao"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "id": {
+                        "S": "IRFa-VaY2a"
+                    },
+                    "Name": {
+                        "S": "Cleaning windows"
+                    },
+                    "Time": {
+                        "N": "10"
+                    },
+                    "Frequency": {
+                        "N": "5"
+                    },
+                    "LastCompleteDate": {
+                        "S": "10/01/2021"
+                    },
+                    "Person": {
+                        "S": "Ricardo"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "id": {
+                        "S": "IRFa-VaY2e"
+                    },
+                    "Name": {
+                        "S": "Vaccuum floors"
+                    },
+                    "Time": {
+                        "N": "60"
+                    },
+                    "Frequency": {
+                        "N": "10"
+                    },
+                    "LastCompleteDate": {
+                        "S": "01/08/2021"
+                    },
+                    "Person": {
+                        "S": "Joao"
+                    }
+                }
+            }
+        }
+    ]
+}
