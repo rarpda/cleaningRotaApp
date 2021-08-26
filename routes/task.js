@@ -20,25 +20,9 @@ if (process.env.name !== "PRODUCTION") {
 }
 var dynamodb = new AWS.DynamoDB({ accessKeyId: "fakeid", secretAccessKey: "fakekey", endpoint: "http://localhost:8000" });
 
-router.get('/listAtributeNames', function(req, res) {
-    dynamodb.describeTable(baseParams, (error, data) => {
-        if (error) {
-            console.error(error)
-            res.status(500).send("Header could not be found")
-        } else {
-            if (data['Table']['ItemCount'] == 0) {
-                res.status(200).send([])
-            } else {
-                res.status(200).send(['id', 'Name', 'Time', 'Frequency', 'LastCompleteDate', 'Person'])
-                    // res.status(200).send(data['Table']['AttributeDefinitions'].map(attribute => attribute['AttributeName']))
-            }
-        }
-    })
-})
-
 /* GET list of tasks*/
 router.get('/', function(req, res) {
-    /* This example scans the entire Music table, and then narrows the results to songs by the artist "No One You Know". For each item, only the album title and song title are returned. */
+    res.set('Cache-Control', "max-age=0")
     dynamodb.scan(baseParams, function(err, data) {
         if (err) {
             console.log(err, err.stack); // an error occurred
@@ -120,7 +104,7 @@ router.post('/', function(req, res, next) {
     // Require nano id to generate unique ids
     const newId = nanoid(10)
         //Check form data in the model
-    let newTask = new task(req.body, false)
+    let newTask = new Task(req.body, false)
     task["id"] = newId
     var params = {
         ...baseParams,

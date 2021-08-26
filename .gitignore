@@ -119,3 +119,5 @@ dynamodb_local_latest
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+todo.txt
