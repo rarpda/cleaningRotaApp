@@ -1,6 +1,5 @@
 {
-    "Task": [
-        {
+    "Task": [{
             "PutRequest": {
                 "Item": {
                     "id": {
@@ -17,6 +16,9 @@
                     },
                     "LastCompleteDate": {
                         "S": "10/08/2021"
+                    },
+                    "PersonAssigned": {
+                        "S": "JK"
                     },
                     "Person": {
                         "S": "Ricardo"
@@ -42,6 +44,9 @@
                     "LastCompleteDate": {
                         "S": "10/10/2021"
                     },
+                    "PersonAssigned": {
+                        "S": "JK"
+                    },
                     "Person": {
                         "S": "Joao"
                     }
@@ -66,6 +71,9 @@
                     "LastCompleteDate": {
                         "S": "10/01/2021"
                     },
+                    "PersonAssigned": {
+                        "S": "JK"
+                    },
                     "Person": {
                         "S": "Ricardo"
                     }
@@ -89,6 +97,9 @@
                     },
                     "LastCompleteDate": {
                         "S": "01/08/2021"
+                    },
+                    "PersonAssigned": {
+                        "S": "JK"
                     },
                     "Person": {
                         "S": "Joao"

@@ -1,18 +1,51 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Cleaning Rota</title>
-        <script src="/javascripts/index.js"></script>
-    </head>
-    <body>
+
+<head>
+    <title>Cleaning Rota</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <script src="/javascripts/index.js"></script>
+</head>
+
+<body>
+    <div class="tableRota">
         <h1>Cleaning Rota</h1>
-        <div>
-            <!-- Table creation for entry find max -->
-            <table id="myTable">
-            </table>
-        </div>
-        <footer>
-            Help
-        </footer>
-    </body>
+        <!-- Table creation for entry find max -->
+        <table id="myTable">
+        </table>
+        <modal>
+            <!-- The Modal credit https://www.w3schools.com/w3css/w3css_modal.asp-->
+            <div id="markCompleteModal" class="w3-modal">
+                <div class="w3-modal-content">
+                    <!-- <div class="w3-container"> -->
+                    <header>
+                        <h1 id="title"></h1>
+                        <span onclick="document.getElementById('markCompleteModal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+                    </header>
+                    <div id="completeModal">
+                    </div>
+                    <hr/>
+                    <div class="submit">
+                        <form id="markCompleteForm">
+                            <label> Date completed(*):
+                                <input id="lastCompleteDate" name="lastCompleteDate" type="date" required />
+                            </label>
+                            <label>
+                                Whoami (*):
+                                <input name="person" type="text" required/>
+                            </label>
+                            <button type="submit">Mark complete</button>
+                        </form>
+                    </div>
+
+                    <!-- </div> -->
+                </div>
+            </div>
+        </modal>
+    </div>
+    <footer>
+        Help
+    </footer>
+</body>
+
 </html>

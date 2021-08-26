@@ -11,3 +11,4 @@ create table  with entries
 aws dynamodb create-table --cli-input-json file://test/databaseStarter.json --endpoint-url http://localhost:8000
 
 aws dynamodb batch-write-item --request-items file://test/mockData.json --endpoint-url http://localhost:8000
+
