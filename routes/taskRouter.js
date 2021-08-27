@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const { nanoid } = require('nanoid')
-const Task = require("../model/Task")
+const Task = require("../public/model/node_task")
 
 //ADd aws wrapper late
 var AWS = require("aws-sdk")
@@ -77,38 +77,19 @@ router.delete('/:id', function(req, res, next) {
     });
 });
 
-router.put('/:id', function(req, res, next) {
-    const id = req.query.param
-        //Check form data in the model
-    let newTask = new task(req.body, false)
-    task["id"] = newId
-    var params = {
-        ...baseParams,
-        ...newTask
-    }
-    dynamodb.putItem(params, function(err, data) {
-        if (err) {
-            console.log(err, err.stack); // an error occurred
-            res.status(400).send("Failed to update task!")
-        } else {
-            console.log(data); // successful response
-            res.status(201).send("Updated task!")
-        }
-        res.send('respond with a resource');
-    });
-})
+
 
 // Requires body parsing -> Form data
-router.post('/', function(req, res, next) {
+router.post('/', function(req, res) {
 
     // Require nano id to generate unique ids
     const newId = nanoid(10)
         //Check form data in the model
-    let newTask = new Task(req.body, false)
-    task["id"] = newId
+    let newTask = new Task({...req.body, "id": newId }, false)
+
     var params = {
         ...baseParams,
-        ...newTask
+        Item: newTask.prepareAWSwrite()
     }
 
     dynamodb.putItem(params, function(err, data) {
@@ -119,15 +100,52 @@ router.post('/', function(req, res, next) {
             console.log(data); // successful response
             res.status(201).send("Created task!")
         }
-        res.send('respond with a resource');
     });
+})
+
+router.put('/:id', function(req, res) {
+    //Check form data in the model
+    let newTask = new Task(req.body, false)
+    const id = req.params.id;
+    if (id !== newTask['id'].value) {
+        return res.status(400).send("ID and payload do not match")
+    }
+    //Check if table has item - if yes then put
+    const params = {
+        ...baseParams,
+        Key: {
+            "id": {
+                S: id
+            }
+        }
+    }
+    dynamodb.getItem(params, function(err, data) {
+        if (err) {
+            console.log(err, err.stack); // an error occurred
+            res.status(500).send("Task does not exist")
+        } else {
+            const writeParams = {
+                ...baseParams,
+                Item: newTask.prepareAWSwrite()
+            }
+            dynamodb.putItem(writeParams, function(err, data) {
+                if (err) {
+                    console.log(err, err.stack); // an error occurred
+                    res.status(400).send("Failed to update task!")
+                } else {
+                    console.log(data); // successful response
+                    res.status(201).send("Updated task!")
+                }
+            });
+        }
+    });
+
 })
 
 //PATCH
 router.patch("/:id/markComplete", function(req, res) {
     //query
     const id = req.params.id
-    console.log(id, req.body)
     var params = {
         ...baseParams,
         Key: {
@@ -136,18 +154,19 @@ router.patch("/:id/markComplete", function(req, res) {
             },
         },
         ExpressionAttributeNames: {
-            "#LC": "LastComplete",
-            "#P": "Person"
+            "#LC": "LastCompleteDate",
+            "#P": "LastPersonToComplete"
         },
         ExpressionAttributeValues: {
             ":lc": {
-                S: req.body['lastCompleteDate']
+                S: req.body['LastCompleteDate']
             },
             ":p": {
-                S: req.body['person']
+                S: req.body['LastPersonToComplete']
             }
         },
-        UpdateExpression: "SET #P = :p, #LC = :lc"
+        UpdateExpression: "SET #P = :p, #LC = :lc",
+        ReturnValues: "ALL_NEW"
     }
     dynamodb.updateItem(params, function(err, data) {
         if (err) {

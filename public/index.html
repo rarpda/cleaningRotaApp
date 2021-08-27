@@ -4,7 +4,7 @@
 <head>
     <title>Cleaning Rota</title>
     <link rel="stylesheet" href="/stylesheets/style.css">
-    <script src="/javascripts/index.js"></script>
+    <script src="/javascripts/index.js" type="module"></script>
 </head>
 
 <body>
@@ -24,15 +24,15 @@
                     </header>
                     <div id="completeModal">
                     </div>
-                    <hr/>
+                    <hr />
                     <div class="submit">
                         <form id="markCompleteForm">
                             <label> Date completed(*):
-                                <input id="lastCompleteDate" name="lastCompleteDate" type="date" required />
+                                <input id="lastCompleteDate" name="LastCompleteDate" type="date" required />
                             </label>
                             <label>
                                 Whoami (*):
-                                <input name="person" type="text" required/>
+                                <input name="LastPersonToComplete" type="text" required />
                             </label>
                             <button type="submit">Mark complete</button>
                         </form>

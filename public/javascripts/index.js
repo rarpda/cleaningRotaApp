@@ -1,5 +1,9 @@
+import Task from "/model/task.js";
+
 let date
 let taskDiplayed;
+let headerPosition = {}
+let data = {}
 
 function parseTitle(title) {
     return title.split(RegExp("(?<=[a-z])(?=[A-Z])")).join(" ")
@@ -14,15 +18,11 @@ function rxFetchHandler(res) {
     }
 }
 
-
-function addRowToTable(taskData) {
-
-}
-
 function addNewTaskHandler(event) {
     // Collect all inputs from last row in the table
-    const payload = getInputsFromForm(document.getElementsByClassName("editable"))
-    fetch("/task", { method: "POST", hearders: { "Content-Type": "application/json" }, data: JSON.stringify(payload) })
+    const payload = getInputsFromForm(document.getElementsByClassName("editable")[0])
+    console.log(payload)
+    fetch("/task", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
         .then(rxFetchHandler)
         .then(data => {
             //TODO - Upload table with new entry
@@ -35,16 +35,13 @@ function addNewTaskHandler(event) {
 }
 
 function markCompleteHandler(event) {
-    // event.preventDefault()
     let modal = document.getElementById("markCompleteModal")
     modal.style.display = "block"
     let id = event.target.className
-
-    //Populate modal with task info.
+        //Populate modal with task info.
     const taskToDisplay = data[event.target.className]
-    console.log(taskToDisplay)
     const taskToDisplayDiv = document.getElementById("completeModal")
-    document.getElementById("title").innerText = `${Object.values(taskToDisplay["Name"])[0]}`
+    document.getElementById("title").innerText = `${taskToDisplay["TaskName"].value}`
     const element = document.getElementById("completeModal")
     while (element.firstChild) {
         element.removeChild(element.firstChild)
@@ -52,35 +49,36 @@ function markCompleteHandler(event) {
     taskDiplayed = taskToDisplay
 
     let textElement = document.createElement("p")
-    textElement.append(document.createTextNode(`Last completed date: ${Object.values(taskToDisplay["LastCompleteDate"])[0]}`))
+    textElement.append(document.createTextNode(`Last completed date: ${taskToDisplay["LastCompleteDate"].value}`))
     taskToDisplayDiv.append(textElement)
     textElement = document.createElement("p")
-    textElement.append(document.createTextNode(`Last person to complete: ${Object.values(taskToDisplay["LastPersonToComplete"]|taskToDisplay["Person"])[0]}`))
+    textElement.append(document.createTextNode(`Last person to complete: ${taskToDisplay["LastPersonToComplete"].value}`))
     taskToDisplayDiv.append(textElement)
     textElement = document.createElement("p")
-    textElement.append(document.createTextNode(`Currently assigned to: ${Object.values(taskToDisplay["PersonAssignedTo"]|taskToDisplay["Person"])[0]}`))
+    textElement.append(document.createTextNode(`Currently assigned to: ${taskToDisplay["PersonAssigned"].value}`))
     taskToDisplayDiv.append(textElement)
-
-    let isoDate = taskToDisplay['LastCompleteDate']['S'].split("/").reverse()
-    date.min = isoDate.join("-")
+    console.log(taskToDisplay['LastCompleteDate'].value)
+    date.min = taskToDisplay['LastCompleteDate'].value
 
 }
 
 
-function getInputsFromForm(parentHTML) {
-    let inputs = parentHTML.getElementsByTagName("input")
+function getInputsFromForm(element) {
+    let inputs = element.getElementsByTagName("input")
     let payload = {}
     for (const entry in Object.keys(inputs)) {
+        console.log(inputs[entry]["name"], inputs[entry]["value"])
         payload[inputs[entry]["name"]] = inputs[entry]["value"]
     }
     return payload
 }
 
 function submitCompletion(event) {
-    event.preventDefault()
-        //Fetch all inputs from form
-    payload = getInputsFromForm(event.target)
-    const taskId = taskDiplayed['id']['S']
+    //Fetch all inputs from form
+    console.log(event.target)
+    let payload = getInputsFromForm(event.target.parentNode)
+    console.log(payload)
+    const taskId = taskDiplayed['id'].value
         //MAke patch request
     fetch(`/task/${taskId}/markComplete`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
         .then(res => {
@@ -98,18 +96,17 @@ function submitCompletion(event) {
         .catch(error => {
             //BANNER
             console.error("submitCompletion:", res)
-            alert(`${taskDiplayed['Name']['S']} could not be marked as complete!`)
+            alert(`${taskDiplayed['Name'].value} could not be marked as complete!`)
         })
 }
 
-headerPosition = {}
-data = {}
 
-
-//Get data 
 fetch("/task/", { method: "GET" }).then((res) => {
-    if (res.ok) return res.json()
-    else throw new Error("Could not fetch  header data")
+    if (res.ok) {
+        return res.json()
+    } else {
+        throw new Error("Could not fetch data")
+    }
 }).then((entryData) => {
     //Create header
     let table = document.getElementById("myTable");
@@ -119,44 +116,47 @@ fetch("/task/", { method: "GET" }).then((res) => {
 
     //TODO need order to make sense
     let headerPosition = {}
-    i = 0
+    let i = 0
+
     entryData.forEach(el => {
-            Object.keys(el['data']).forEach(prop => {
-                if (!(prop in headerPosition)) {
-                    headerPosition[prop] = i
-                    var cell = row.insertCell(i);
-                    let normalisedTitle = prop.split(RegExp("(?<=[a-z])(?=[A-Z])"))
-                    normalisedTitle = normalisedTitle.join(" ")
-                    cell.appendChild(document.createTextNode(normalisedTitle));
-                    i++;
-                }
-            })
+        Object.keys(el['data']).forEach(prop => {
+            if (prop !== "id" && !(prop in headerPosition)) {
+                headerPosition[prop] = [i, el['data'][prop].type]
+                var cell = row.insertCell(i);
+                let normalisedTitle = prop.split(RegExp("(?<=[a-z])(?=[A-Z])"))
+                normalisedTitle = normalisedTitle.join(" ")
+                cell.appendChild(document.createTextNode(normalisedTitle));
+                i++;
+            }
         })
-        //Add last col for marking if complete
-    headerPosition["markComplete"] = i
+    })
+
+    //Add last col for marking if complete
+    headerPosition["markComplete"] = [i, null]
     let markComplete = row.insertCell()
     markComplete.appendChild(document.createTextNode("Mark Complete"));
 
     let body = table.createTBody()
     entryData.forEach(element => {
-        data[element['data']['id']['S']] = element['data']
-
+        data[element['data']['id'].value] = element['data']
         let row = body.insertRow();
         let cells = Object.keys(headerPosition).map(() => row.insertCell())
         for (const [key, value] of Object.entries(element['data'])) {
             // let cell = row.insertCell(headerPosition[key])
             // Append a text node to the cell
-            cells[headerPosition[key]].appendChild(document.createTextNode(Object.values(value)[0]));
+            if (key in headerPosition) {
+                cells[headerPosition[key][0]].appendChild(document.createTextNode(value["value"]));
+            }
             //onhover tooltip -> show meesage click to edit
             //onclick open input
         }
         // let markComplete = row.insertCell()
         let button = document.createElement("button")
-        button.classList = element['data']['id']['S']
+        button.classList = element['data']['id'].value
         button.textContent = "Mark Complete"
             //TODO Onclick show modal with date input, task name, and input to write who did it. Can look to pull from local storage!
         button.addEventListener("click", markCompleteHandler, false)
-        cells[headerPosition["markComplete"]].appendChild(button);
+        cells[headerPosition["markComplete"][0]].appendChild(button);
     });
 
 
@@ -164,11 +164,8 @@ fetch("/task/", { method: "GET" }).then((res) => {
     let editable = body.insertRow(-1)
     editable.className = "editable"
 
-    // let cells = Object.keys(headerPosition).map(() => editable.insertCell())
-    console.log(headerPosition)
     for (const [key, value] of Object.entries(headerPosition)) {
-        console.log(key, value)
-        let cell = editable.insertCell(value)
+        let cell = editable.insertCell(value[0])
         if (key === "markComplete") {
             let button = document.createElement("button")
             button.textContent = "Add"
@@ -178,20 +175,16 @@ fetch("/task/", { method: "GET" }).then((res) => {
             cell.append(button)
         } else {
             let editableCell = document.createElement("input")
+            editableCell.type = value[1]
             editableCell.name = key
             cell.append(editableCell)
         }
-
-        // cell.append(document.createTextNode("dsadsads"))
-        //     //onclick copy text into input
     }
 
     document.getElementById("markCompleteForm").addEventListener("submit", submitCompletion)
-
-
     date = document.getElementById("lastCompleteDate")
     date.max = (new Date()).toISOString().substring(0, 10)
-})
+}).catch(error => console.error(error))
 
 
 //On hover tooltipp

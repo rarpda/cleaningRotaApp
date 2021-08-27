@@ -13,7 +13,7 @@ a {
 
 .tableRota {
     /* Centered */
-    width: 50%;
+    width: 75%;
     margin: auto;
 }
 
@@ -76,7 +76,7 @@ button {
 }
 
 header>h1 {
-    padding-left: 1rem;
+    margin-left: 0.5rem;
     /* display: inline; */
     /* flex-grow: 4; */
     /* default 0 */
@@ -89,4 +89,17 @@ header>h1 {
     padding: 0;
     outline: 0;
     width: 600px
+}
+
+#markCompleteForm {
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: center;
+    align-content: center;
+    padding-bottom: 3%;
+    padding-top: 1%;
+}
+
+#markCompleteForm>* {
+    margin: 0.5%;
 }

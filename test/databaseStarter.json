@@ -1,25 +1,19 @@
 {
-    "AttributeDefinitions": [
-        {
-            "AttributeName": "id",
-            "AttributeType": "S"
-        }
-    ],
+    "AttributeDefinitions": [{
+        "AttributeName": "id",
+        "AttributeType": "S"
+    }],
     "TableName": "Task",
-    "KeySchema": [
-        {
-            "AttributeName": "id",
-            "KeyType": "HASH"
-        }
-    ],
-    "Tags": [
-        {
-            "Key": "Owner",
-            "Value": "BlueTeam"
-        }
-    ],
+    "KeySchema": [{
+        "AttributeName": "id",
+        "KeyType": "HASH"
+    }],
+    "Tags": [{
+        "Key": "App",
+        "Value": "CleaningRota"
+    }],
     "ProvisionedThroughput": {
         "ReadCapacityUnits": 1,
         "WriteCapacityUnits": 1
-      }
+    }
 }

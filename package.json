@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.975.0",
+    "axios": "^0.21.1",
     "chai": "^4.3.4",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",

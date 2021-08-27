@@ -5,22 +5,22 @@
                     "id": {
                         "S": "IRFa-VaY2b"
                     },
-                    "Name": {
+                    "TaskName": {
                         "S": "Cleaning floors"
                     },
-                    "Time": {
+                    "Duration": {
                         "N": "30"
                     },
                     "Frequency": {
                         "N": "1"
                     },
                     "LastCompleteDate": {
-                        "S": "10/08/2021"
+                        "S": "2021-01-01"
                     },
                     "PersonAssigned": {
                         "S": "JK"
                     },
-                    "Person": {
+                    "LastPersonToComplete": {
                         "S": "Ricardo"
                     }
                 }
@@ -32,22 +32,22 @@
                     "id": {
                         "S": "IRFa-VaY22"
                     },
-                    "Name": {
+                    "TaskName": {
                         "S": "Cleaning doors"
                     },
-                    "Time": {
+                    "Duration": {
                         "N": "40"
                     },
                     "Frequency": {
                         "N": "3"
                     },
                     "LastCompleteDate": {
-                        "S": "10/10/2021"
+                        "S": "2021-01-01"
                     },
                     "PersonAssigned": {
                         "S": "JK"
                     },
-                    "Person": {
+                    "LastPersonToComplete": {
                         "S": "Joao"
                     }
                 }
@@ -59,22 +59,22 @@
                     "id": {
                         "S": "IRFa-VaY2a"
                     },
-                    "Name": {
+                    "TaskName": {
                         "S": "Cleaning windows"
                     },
-                    "Time": {
+                    "Duration": {
                         "N": "10"
                     },
                     "Frequency": {
                         "N": "5"
                     },
                     "LastCompleteDate": {
-                        "S": "10/01/2021"
+                        "S": "2021-01-01"
                     },
                     "PersonAssigned": {
                         "S": "JK"
                     },
-                    "Person": {
+                    "LastPersonToComplete": {
                         "S": "Ricardo"
                     }
                 }
@@ -86,22 +86,22 @@
                     "id": {
                         "S": "IRFa-VaY2e"
                     },
-                    "Name": {
+                    "TaskName": {
                         "S": "Vaccuum floors"
                     },
-                    "Time": {
+                    "Duration": {
                         "N": "60"
                     },
                     "Frequency": {
                         "N": "10"
                     },
                     "LastCompleteDate": {
-                        "S": "01/08/2021"
+                        "S": "2021-01-01"
                     },
                     "PersonAssigned": {
                         "S": "JK"
                     },
-                    "Person": {
+                    "LastPersonComplete": {
                         "S": "Joao"
                     }
                 }

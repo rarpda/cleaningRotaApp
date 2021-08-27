@@ -19,8 +19,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const taskRouter = require('./routes/task')
-app.use("/task",taskRouter)
+const taskRouter = require('./routes/taskRouter')
+app.use("/task", taskRouter)
 
 // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
@@ -33,7 +33,7 @@ app.set('port', process.env.PORT || 3000);
 const http = require("http")
 
 http.createServer({}, app).listen(3000, () => {
-  console.log("Listening HTTP on port " + 3000);
+    console.log("Listening HTTP on port " + 3000);
 });
 
 // error handler
