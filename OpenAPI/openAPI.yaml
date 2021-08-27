@@ -1,0 +1,227 @@
+openapi: 3.0.1
+info:
+  title: Cleaning Rota
+  description: This API is for the cleaning rota.
+  contact:
+    email: ricardoarpapt@gmail.com
+  version: 0.0.1
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+- url: /
+tags:
+- name: task
+  description: Everything about task.
+paths:
+  /task:
+    get:
+      tags:
+      - Task
+      summary: Get list of all tasks.
+      responses:
+        200:
+          description: Produces json list of tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        500:
+          description: Server side error
+          content: {}
+      security:
+      - api_key: []
+    post:
+      tags:
+      - task
+      summary: Add a new task to the rota.
+      requestBody:
+        description: Task object that needs to be added.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+        required: true
+      responses:
+        201:
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Task'
+        400:
+          description: Bad request
+          content: {}
+      security:
+      - api_key: []
+      x-codegen-request-body-name: body
+  /task/{taskId}:
+    get:
+      tags:
+      - task
+      summary: Find task by ID
+      description: Returns a single task
+      operationId: getTaskById
+      parameters:
+      - name: taskId
+        in: path
+        description: ID of the task to return
+        required: true
+        schema:
+          type: string
+          format: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        404:
+          description: Task not found
+          content: {}
+      security:
+      - api_key: []
+    put:
+      tags:
+      - task
+      summary: Update the task
+      description: Updates the task with new object.
+      operationId: updateUser
+      parameters:
+      - name: taskId
+        in: path
+        description: name that need to be updated
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Optional description in *Markdown*
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Task'
+        required: true
+      responses:
+        201:
+          description: Task updated
+          content: {}
+        400:
+          description: Invalid task supplied
+          content: {}
+      security:
+      - api_key: []
+      x-codegen-request-body-name: markComplete
+    delete:
+      tags:
+      - task
+      summary: Delete task
+      description: Delete task in the rota.
+      operationId: deleteId
+      parameters:
+      - name: taskId
+        in: path
+        description: ID of the task to delete
+        required: true
+        schema:
+          type: string
+          format: string
+      responses:
+        200:
+          description: Deleted
+          content: {}
+        400:
+          description: Could not delete task
+          content: {}
+  /task/{taskId}/markComplete:
+    patch:
+      tags:
+      - task
+      summary: Mark task as completed.
+      description: Shows nothing
+      parameters:
+      - name: taskId
+        in: path
+        description: ID of the task to return
+        required: true
+        schema:
+          type: string
+          format: string
+      requestBody:
+        description: Optional description in *Markdown*
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/MarkCompleted'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Task'
+        400:
+          description: Invalid ID supplied
+          content: {}
+      security:
+      - api_key: []
+      x-codegen-request-body-name: markComplete
+components:
+  schemas:
+    MarkCompleted:
+      required:
+      - LastCompleteDate
+      - LastPersonToComplete
+      type: object
+      properties:
+        LastCompleteDate:
+          type: string
+          description: Last date completed
+        LastPersonToComplete:
+          type: string
+          description: Last person to mark as complete
+    Task:
+      required:
+      - TaskName
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of object.
+          example: A2E2-LP021
+        TaskName:
+          type: string
+          description: Name of the task.
+          example: Cleaning floors
+        LastCompleteDate:
+          type: string
+          example: 02/10/2021
+        Duration:
+          type: number
+          example: 1.0
+        Frequency:
+          type: number
+          example: 1.0
+        PersonAssigned:
+          type: string
+          example: Pablo
+        LastPersonToComplete:
+          type: string
+          example: Pablo
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header

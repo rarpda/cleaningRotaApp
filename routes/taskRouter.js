@@ -6,7 +6,7 @@ const databaseHandler = require("../database/databaseHandler")
 
 /* GET list of tasks*/
 router.get('/', function(req, res) {
-    res.set('Cache-Control', "max-age=0")
+    res.set('Cache-Control', "max-age=10000")
     databaseHandler.getAllTasks(function(error, data) {
         if (error) {
             console.error(error)
@@ -23,7 +23,7 @@ router.get('/:id', function(req, res) {
     databaseHandler.getTask(id, function(error, data) {
         if (error) {
             console.error(error)
-            res.status(500).send("Could not get item for id:" + taskId)
+            res.status(404).send("Could not get item for id:" + taskId)
         } else {
             res.status(200).send(new Task(data['Items']))
         }
@@ -38,7 +38,7 @@ router.delete('/:id', function(req, res) {
             console.error(error)
             res.status(400).send("Failed to delete task!")
         } else {
-            res.status(201).send()
+            res.status(200).send("Deleted!")
         }
     })
 })
@@ -87,7 +87,7 @@ router.patch("/:id/markComplete", function(req, res) {
             console.error(error)
             res.status(400).send("Failed to mark last complete!")
         } else {
-            res.status(201).send(new Task(data['Attributes']))
+            res.status(200).send(new Task(data['Attributes']))
         }
     })
 })
