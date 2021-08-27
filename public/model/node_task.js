@@ -43,7 +43,6 @@ class Task {
 
     // Throws error
     constructor(object, originAWS = true) {
-        console.log(object)
         for (const [attributeName, type] of Object.entries(this.attributes)) {
             if (attributeName in object) {
                 let value;

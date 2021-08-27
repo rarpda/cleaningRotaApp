@@ -40,27 +40,65 @@ fetch("/task/", { method: "GET" }).then((res) => {
 
     let body = table.createTBody()
     entryData.forEach(element => {
-        insertTask(body, element)
+        data[element['data']['id'].value] = element['data']
+        insertTask(body, element['data'])
     });
 
+    insertEditableRow(body)
+}).catch(error => console.error(error))
 
-    //Insert editable in end - TODO
-    let editable = body.insertRow(-1)
-    editable.className = "editable"
+
+
+
+
+
+function insertEditableRow(body, index = -1, task = {}) {
+    let editable = body.insertRow(index)
+    if ("id" in task) {
+        editable.id = task['id'].value
+    } else {
+        editable.className = "editable"
+    }
 
     for (const [key, value] of Object.entries(headerPosition)) {
         let cell = editable.insertCell(value[0])
+        cell.className = key
         if (key === optionsName) {
             let button = document.createElement("button")
-            button.textContent = "Add"
-            button.classList = "save";
-            //TODO Should collect data and do a post to /task -> on save click 
-            button.addEventListener("click", addNewTaskHandler)
-            cell.append(button)
+            if ("id" in task) {
+                //Editing
+                button.textContent = "Save"
+                button.addEventListener("click", onEditSubmissionHandler)
+                button.classList = "save";
+                cell.append(button)
+                let cancelButton = document.createElement("button")
+                cancelButton.textContent = "Cancel"
+                cancelButton.addEventListener("click", (event) => {
+                    const selectedRow = event.target.closest("tr")
+                    const rowToReplace = selectedRow.rowIndex;
+                    const task = data[selectedRow.id]
+                    console.log(task)
+                    selectedRow.remove()
+                    let table = document.getElementById("myTable")
+                    insertTask(table, task, rowToReplace)
+                })
+                cell.append(cancelButton)
+            } else {
+                button.textContent = "Add"
+                button.addEventListener("click", addNewTaskHandler)
+                button.classList = "save";
+                cell.append(button)
+            }
+
+
+
         } else {
             let editableCell = document.createElement("input")
             editableCell.type = value[1]
             editableCell.name = key
+            if (key in task) {
+                editableCell.value = task[key].value
+            }
             cell.append(editableCell)
         }
     }
@@ -68,7 +106,7 @@ fetch("/task/", { method: "GET" }).then((res) => {
     document.getElementById("markCompleteForm").addEventListener("submit", submitCompletion)
     date = document.getElementById("lastCompleteDate")
     date.max = (new Date()).toISOString().substring(0, 10)
-}).catch(error => console.error(error))
+}
 
 function parseTitle(title) {
     return title.split(RegExp("(?<=[a-z])(?=[A-Z])")).join(" ")
@@ -79,14 +117,13 @@ function parseTitle(title) {
 
 function insertTask(body, task, index = -1) {
     let row = body.insertRow(index)
-    data[task['data']['id'].value] = task['data']
-    row.id = task['data']['id'].value
+    row.id = task['id'].value
     let cells = Object.keys(headerPosition).map((el) => {
         let cell = row.insertCell()
         cell.className = el
         return cell
     })
-    for (const [key, value] of Object.entries(task['data'])) {
+    for (const [key, value] of Object.entries(task)) {
         // Append a text node to the cell
         if (key in headerPosition) {
             cells[headerPosition[key][0]].appendChild(document.createTextNode(value["value"]));
@@ -95,7 +132,7 @@ function insertTask(body, task, index = -1) {
     // let button = document.createElement("button")
 
     let dropdown = document.createElement("select")
-    dropdown.className = task['data']['id'].value
+    dropdown.className = task['id'].value
         // Option group for different options
     const options = { "Mark Complete": markCompleteHandler, "Edit": editTaskHandler, "Delete": deleteTaskHandler }
     for (const title in options) {
@@ -115,7 +152,7 @@ function addNewTaskHandler(event) {
     fetch("/task", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
         .then((res) => {
             if (res.ok) {
-                console.log(res)
+                console.log("post", res)
                 return res.json()
             } else {
                 //TODO alert!
@@ -128,13 +165,43 @@ function addNewTaskHandler(event) {
                 //Add new row
             const totalRowCount = document.getElementsByTagName("tr").length
             let table = document.getElementById("myTable");
-            insertTask(table, newTask, totalRowCount - 1)
+            data[newTask['data']['id'].value] = newTask['data']
+            insertTask(table, newTask['data'], totalRowCount - 1)
         })
         .catch((error) => {
             console.error(error)
         })
 }
 
+
+function onEditSubmissionHandler(event) {
+    // Collect all inputs from last row in the table
+    const selectedRow = event.target.closest("tr")
+    let payload = getInputsFromForm(selectedRow)
+    payload = Object.assign(payload, { "id": selectedRow.id })
+    fetch(`/task/${selectedRow.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        .then((res) => {
+            if (res.ok) {
+                console.log(res)
+                return res.json()
+            } else {
+                //TODO alert!
+                throw new Error(res)
+            }
+        })
+        .then(newTask => {
+            //Clear inputs 
+            let table = document.getElementById("myTable")
+            data[selectedRow.id] = newTask['data'];
+            console.log(newTask)
+            let rowIndex = selectedRow.rowIndex;
+            selectedRow.remove()
+            insertTask(table, data[selectedRow.id], rowIndex)
+        })
+        .catch((error) => {
+            console.error(error)
+        })
+}
 
 function deleteTaskHandler(event) {
     const selectedRow = event.target.closest("tr")
@@ -158,8 +225,13 @@ function deleteTaskHandler(event) {
 
 
 function editTaskHandler(event) {
-    const id = event.target.className
-
+    const selectedRow = event.target.closest("tr")
+    let id = selectedRow.id
+    let index = selectedRow.rowIndex
+    selectedRow.remove()
+    let table = document.getElementById("myTable")
+    console.log(data, data[id])
+    insertEditableRow(table, index, data[id])
 }
 
 
@@ -235,6 +307,7 @@ function submitCompletion(event) {
             alert(`${taskDiplayed['Name'].value} could not be marked as completed!`)
         })
 }
+
 
 
 

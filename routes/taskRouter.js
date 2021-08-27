@@ -50,7 +50,6 @@ router.post('/', function(req, res) {
     const newId = nanoid(10)
         //Check form data in the model
     let newTask = new Task({...req.body, "id": newId }, false)
-    console.log(newTask)
     databaseHandler.createNewTask(newTask, function(error, data) {
         if (error) {
             console.error(error)
@@ -62,18 +61,18 @@ router.post('/', function(req, res) {
 })
 
 router.put('/:id', function(req, res) {
-    //Check form data in the model
-    let newTask = new Task(req.body, false)
+    //Check form data in the model   
     const id = req.params.id;
-    if (id !== newTask['id'].value) {
+    if (id !== req.body.id) {
         return res.status(400).send("ID and payload do not match")
     } else {
+        let newTask = new Task(req.body, false)
         databaseHandler.updateExistingTask(id, newTask, function(error, data) {
             if (error) {
                 console.error(error)
                 res.status(400).send("Failed to update task!")
             } else {
-                res.status(201).send()
+                res.status(201).send(newTask)
             }
         })
     }
