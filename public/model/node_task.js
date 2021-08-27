@@ -1,10 +1,21 @@
 class Attribute {
-    supportedTypes = { "date": "S", "string": "S", "number": "N" }
 
     constructor(type, value) {
+        let castValue;
+        if (type === "number") {
+            castValue = parseInt(value)
+            if (!Number.isInteger(castValue)) throw new Error(`${value} is not a number`)
+
+        } else if (type === "date") {
+            castValue = Date.parse(value)
+            if (!Number.isInteger(castValue)) throw new Error(`${value} is not a date`)
+        } else if (type === "string") {
+            castValue = value;
+        } else {
+            throw new Error(`${type} is not supported!`)
+        }
         this.value = value
         this.type = type
-        this.awsType = this.supportedTypes[type]
     }
 }
 
@@ -20,52 +31,30 @@ class Task {
         "LastPersonToComplete": "string"
     }
 
-    prepareAWSwrite() {
-            let itemData = {}
-            for (const property in this.data) {
-                let myKey = {}
-                myKey[this.data[property].awsType] = String(this.data[property].value)
-                itemData[property] = myKey
-            }
-            return itemData
-        }
-        //Expected attributes
 
+    static checkMarkComplete(payload) {
+        let date = new Attribute("date", payload['LastCompleteDate']),
+            person = new Attribute("string", payload['LastPersonToComplete'])
+        return {
+            'LastCompleteDate': date.value,
+            'LastPersonToComplete': person.value
+        }
+    }
+
+    // Throws error
     constructor(object, originAWS = true) {
-        if (originAWS) {
-            for (const [key, type] of Object.entries(this.attributes)) {
-                //Get object
-                if (object[key]) {
-                    this.data[key] = new Attribute(type, Object.values(object[key])[0])
+        console.log(object)
+        for (const [attributeName, type] of Object.entries(this.attributes)) {
+            if (attributeName in object) {
+                let value;
+                if (originAWS) {
+                    value = Object.values(object[attributeName])[0]
                 } else {
-                    console.error("Does not have " + key)
+                    value = object[attributeName]
                 }
-            }
-        } else {
-            //JSON 
-            for (const [key, expectedType] of Object.entries(this.attributes)) {
-                //Get object
-                if (key in object) {
-                    //Try to cast
-                    let objectValue = object[key]
-                    if (expectedType === "number") {
-                        objectValue = parseInt(objectValue)
-                    } else if (expectedType === "date") {
-                        objectValue = Date.parse(objectValue)
-                    } else if (expectedType === "string") {
-                        objectValue = objectValue;
-                    } else {
-                        objectValue = null;
-                    }
-                    if (objectValue) {
-                        this.data[key] = new Attribute(expectedType, objectValue)
-                    } else {
-                        //Throw an error
-                        console.error(`${key} is ${typeof(objectValue)} but should be ${expectedType}.`)
-                    }
-                } else {
-                    console.error(`${key} is not in payload.`)
-                }
+                this.data[attributeName] = new Attribute(type, value)
+            } else {
+                // console.error("Does not have " + attributeName)
             }
         }
     }

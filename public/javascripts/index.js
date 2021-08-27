@@ -1,5 +1,3 @@
-import Task from "/model/task.js";
-
 let date
 let taskDiplayed;
 let headerPosition = {}
@@ -9,57 +7,105 @@ function parseTitle(title) {
     return title.split(RegExp("(?<=[a-z])(?=[A-Z])")).join(" ")
 }
 
-function rxFetchHandler(res) {
-    if (res.ok) {
-        return res.json()
-    } else {
-        //TODO alert!
-        throw new Error(res)
+function insertRow(task, index = -1) {
+    let table = document.getElementById("myTable");
+    let row = table.insertRow(index)
+    data[newTask['data']['id'].value] = task['data']
+    row.id = task['data']['id'].value
+    let cells = Object.keys(headerPosition).map((el) => {
+        let cell = row.insertCell()
+        cell.className = el
+        return cell
+    })
+    for (const [key, value] of Object.entries(task['data'])) {
+        // Append a text node to the cell
+        if (key in headerPosition) {
+            cells[headerPosition[key][0]].appendChild(document.createTextNode(value["value"]));
+        }
+
     }
+    let button = document.createElement("button")
+    button.classList = task['data']['id'].value
+    button.textContent = "Mark Complete"
+        //TODO Onclick show modal with date input, task name, and input to write who did it. Can look to pull from local storage!
+    button.addEventListener("click", markCompleteHandler, false)
+    cells[headerPosition["markComplete"][0]].appendChild(button);
 }
+
 
 function addNewTaskHandler(event) {
     // Collect all inputs from last row in the table
     const payload = getInputsFromForm(document.getElementsByClassName("editable")[0])
-    console.log(payload)
     fetch("/task", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-        .then(rxFetchHandler)
-        .then(data => {
-            //TODO - Upload table with new entry
-            location.reload()
-                //BANNER 
+        .then((res) => {
+            if (res.ok) {
+                console.log(res)
+                return res.json()
+            } else {
+                //TODO alert!
+                throw new Error(res)
+            }
+        })
+        .then(newTask => {
+            //Clear inputs 
+            document.querySelectorAll(".editable td > input").forEach(el => { el.value = "" })
+            let table = document.getElementById("myTable");
+            const totalRowCount = document.getElementsByTagName("tr").length
+            let row = table.insertRow(totalRowCount - 1)
+            data[newTask['data']['id'].value] = newTask['data']
+            row.id = newTask['data']['id'].value
+            let cells = Object.keys(headerPosition).map((el) => {
+                let cell = row.insertCell()
+                cell.className = el
+                return cell
+            })
+            for (const [key, value] of Object.entries(newTask['data'])) {
+                // Append a text node to the cell
+                if (key in headerPosition) {
+                    cells[headerPosition[key][0]].appendChild(document.createTextNode(value["value"]));
+                }
+
+            }
+            let button = document.createElement("button")
+            button.classList = newTask['data']['id'].value
+            button.textContent = "Mark Complete"
+                //TODO Onclick show modal with date input, task name, and input to write who did it. Can look to pull from local storage!
+            button.addEventListener("click", markCompleteHandler, false)
+            cells[headerPosition["markComplete"][0]].appendChild(button);
+
+            //BANNER    
         })
         .catch((error) => {
             console.error(error)
         })
 }
 
+
+
 function markCompleteHandler(event) {
     let modal = document.getElementById("markCompleteModal")
     modal.style.display = "block"
-    let id = event.target.className
         //Populate modal with task info.
     const taskToDisplay = data[event.target.className]
+
     const taskToDisplayDiv = document.getElementById("completeModal")
-    document.getElementById("title").innerText = `${taskToDisplay["TaskName"].value}`
+        // document.getElementById("title").innerText = `${taskToDisplay["TaskName"].value}`
     const element = document.getElementById("completeModal")
     while (element.firstChild) {
         element.removeChild(element.firstChild)
     }
     taskDiplayed = taskToDisplay
+    if (taskToDisplay['LastCompleteDate']) {
+        date.min = taskToDisplay['LastCompleteDate'].value
+    }
 
-    let textElement = document.createElement("p")
-    textElement.append(document.createTextNode(`Last completed date: ${taskToDisplay["LastCompleteDate"].value}`))
-    taskToDisplayDiv.append(textElement)
-    textElement = document.createElement("p")
-    textElement.append(document.createTextNode(`Last person to complete: ${taskToDisplay["LastPersonToComplete"].value}`))
-    taskToDisplayDiv.append(textElement)
-    textElement = document.createElement("p")
-    textElement.append(document.createTextNode(`Currently assigned to: ${taskToDisplay["PersonAssigned"].value}`))
-    taskToDisplayDiv.append(textElement)
-    console.log(taskToDisplay['LastCompleteDate'].value)
-    date.min = taskToDisplay['LastCompleteDate'].value
-
+    const labelsToDisplay = ["LastPersonToComplete", "LastCompleteDate", "PersonAssigned"]
+    labelsToDisplay.forEach((title) => {
+        let textElement = document.createElement("p")
+        let entry = parseTitle(title) + ": " + (title in taskToDisplay ? taskToDisplay[title].value : "N/A")
+        textElement.append(document.createTextNode(entry))
+        taskToDisplayDiv.append(textElement)
+    })
 }
 
 
@@ -67,36 +113,43 @@ function getInputsFromForm(element) {
     let inputs = element.getElementsByTagName("input")
     let payload = {}
     for (const entry in Object.keys(inputs)) {
-        console.log(inputs[entry]["name"], inputs[entry]["value"])
-        payload[inputs[entry]["name"]] = inputs[entry]["value"]
+        if (inputs[entry]["value"]) {
+            payload[inputs[entry]["name"]] = inputs[entry]["value"]
+        }
     }
     return payload
 }
 
 function submitCompletion(event) {
+    event.preventDefault()
+
     //Fetch all inputs from form
-    console.log(event.target)
     let payload = getInputsFromForm(event.target.parentNode)
-    console.log(payload)
     const taskId = taskDiplayed['id'].value
         //MAke patch request
     fetch(`/task/${taskId}/markComplete`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
         .then(res => {
+            console.log(res)
             if (res.ok) {
-                //Close modal and reset fields
-                let modal = document.getElementById("markCompleteModal")
-                modal.style.display = "none"
-                    //TODO should update underlying instead of reloading
-
+                return res.json()
             } else {
                 //TODO alert!
                 throw new Error(res)
             }
         })
+        .then((data) => {
+            console.log(data)
+                //Close modal and reset fields
+            let modal = document.getElementById("markCompleteModal")
+            modal.style.display = "none"
+            for (let [key, value] of Object.entries(payload)) {
+                document.querySelector(`#${taskId} > .${key}`).textContent = value
+            }
+        })
         .catch(error => {
             //BANNER
-            console.error("submitCompletion:", res)
-            alert(`${taskDiplayed['Name'].value} could not be marked as complete!`)
+            console.error("submitCompletion:", error)
+                // alert(`${taskDiplayed['Name'].value} could not be marked as complete!`)
         })
 }
 
@@ -115,7 +168,6 @@ fetch("/task/", { method: "GET" }).then((res) => {
     var row = header.insertRow(0);
 
     //TODO need order to make sense
-    let headerPosition = {}
     let i = 0
 
     entryData.forEach(el => {
@@ -140,7 +192,12 @@ fetch("/task/", { method: "GET" }).then((res) => {
     entryData.forEach(element => {
         data[element['data']['id'].value] = element['data']
         let row = body.insertRow();
-        let cells = Object.keys(headerPosition).map(() => row.insertCell())
+        row.id = element['data']['id'].value
+        let cells = Object.keys(headerPosition).map((el) => {
+            let cell = row.insertCell()
+            cell.className = el
+            return cell
+        })
         for (const [key, value] of Object.entries(element['data'])) {
             // let cell = row.insertCell(headerPosition[key])
             // Append a text node to the cell

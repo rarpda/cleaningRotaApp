@@ -103,3 +103,11 @@ header>h1 {
 #markCompleteForm>* {
     margin: 0.5%;
 }
+
+tbody>tr:hover {
+    background-color: lightblue;
+}
+
+.editable:hover {
+    background-color: white;
+}
