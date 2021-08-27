@@ -7,10 +7,12 @@ function parseTitle(title) {
     return title.split(RegExp("(?<=[a-z])(?=[A-Z])")).join(" ")
 }
 
-function insertRow(task, index = -1) {
-    let table = document.getElementById("myTable");
-    let row = table.insertRow(index)
-    data[newTask['data']['id'].value] = task['data']
+
+
+
+function insertTask(body, task, index = -1) {
+    let row = body.insertRow(index)
+    data[task['data']['id'].value] = task['data']
     row.id = task['data']['id'].value
     let cells = Object.keys(headerPosition).map((el) => {
         let cell = row.insertCell()
@@ -22,7 +24,6 @@ function insertRow(task, index = -1) {
         if (key in headerPosition) {
             cells[headerPosition[key][0]].appendChild(document.createTextNode(value["value"]));
         }
-
     }
     let button = document.createElement("button")
     button.classList = task['data']['id'].value
@@ -49,31 +50,10 @@ function addNewTaskHandler(event) {
         .then(newTask => {
             //Clear inputs 
             document.querySelectorAll(".editable td > input").forEach(el => { el.value = "" })
-            let table = document.getElementById("myTable");
+                //Add new row
             const totalRowCount = document.getElementsByTagName("tr").length
-            let row = table.insertRow(totalRowCount - 1)
-            data[newTask['data']['id'].value] = newTask['data']
-            row.id = newTask['data']['id'].value
-            let cells = Object.keys(headerPosition).map((el) => {
-                let cell = row.insertCell()
-                cell.className = el
-                return cell
-            })
-            for (const [key, value] of Object.entries(newTask['data'])) {
-                // Append a text node to the cell
-                if (key in headerPosition) {
-                    cells[headerPosition[key][0]].appendChild(document.createTextNode(value["value"]));
-                }
-
-            }
-            let button = document.createElement("button")
-            button.classList = newTask['data']['id'].value
-            button.textContent = "Mark Complete"
-                //TODO Onclick show modal with date input, task name, and input to write who did it. Can look to pull from local storage!
-            button.addEventListener("click", markCompleteHandler, false)
-            cells[headerPosition["markComplete"][0]].appendChild(button);
-
-            //BANNER    
+            let table = document.getElementById("myTable");
+            insertTask(table, newTask, totalRowCount - 1)
         })
         .catch((error) => {
             console.error(error)
@@ -89,7 +69,6 @@ function markCompleteHandler(event) {
     const taskToDisplay = data[event.target.className]
 
     const taskToDisplayDiv = document.getElementById("completeModal")
-        // document.getElementById("title").innerText = `${taskToDisplay["TaskName"].value}`
     const element = document.getElementById("completeModal")
     while (element.firstChild) {
         element.removeChild(element.firstChild)
@@ -137,19 +116,21 @@ function submitCompletion(event) {
                 throw new Error(res)
             }
         })
-        .then((data) => {
-            console.log(data)
+        .then((editedTask) => {
+            console.log(editedTask)
                 //Close modal and reset fields
             let modal = document.getElementById("markCompleteModal")
             modal.style.display = "none"
+                //Update values in cells
             for (let [key, value] of Object.entries(payload)) {
                 document.querySelector(`#${taskId} > .${key}`).textContent = value
             }
+            data[editedTask['id'].value] = editedTask
+            taskDiplayed = null;
         })
         .catch(error => {
-            //BANNER
             console.error("submitCompletion:", error)
-                // alert(`${taskDiplayed['Name'].value} could not be marked as complete!`)
+            alert(`${taskDiplayed['Name'].value} could not be marked as completed!`)
         })
 }
 
@@ -190,30 +171,7 @@ fetch("/task/", { method: "GET" }).then((res) => {
 
     let body = table.createTBody()
     entryData.forEach(element => {
-        data[element['data']['id'].value] = element['data']
-        let row = body.insertRow();
-        row.id = element['data']['id'].value
-        let cells = Object.keys(headerPosition).map((el) => {
-            let cell = row.insertCell()
-            cell.className = el
-            return cell
-        })
-        for (const [key, value] of Object.entries(element['data'])) {
-            // let cell = row.insertCell(headerPosition[key])
-            // Append a text node to the cell
-            if (key in headerPosition) {
-                cells[headerPosition[key][0]].appendChild(document.createTextNode(value["value"]));
-            }
-            //onhover tooltip -> show meesage click to edit
-            //onclick open input
-        }
-        // let markComplete = row.insertCell()
-        let button = document.createElement("button")
-        button.classList = element['data']['id'].value
-        button.textContent = "Mark Complete"
-            //TODO Onclick show modal with date input, task name, and input to write who did it. Can look to pull from local storage!
-        button.addEventListener("click", markCompleteHandler, false)
-        cells[headerPosition["markComplete"][0]].appendChild(button);
+        insertTask(body, element)
     });
 
 

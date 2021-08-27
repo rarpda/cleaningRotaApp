@@ -105,9 +105,20 @@ header>h1 {
 }
 
 tbody>tr:hover {
-    background-color: lightblue;
+    color: black;
+    background-color: lightgreen;
+    /* transition: color 0.5s linear; */
+}
+
+tbody>tr {
+    color: grey;
+    background-color: white;
+    transition: background-color 0.5s linear;
+    -moz-transition: background-color 0.5s linear;
+    /* Firefox */
 }
 
 .editable:hover {
     background-color: white;
+    /* vendorless fallback */
 }
