@@ -33,12 +33,12 @@ router.get('/:id', function(req, res) {
 // DELETE 
 router.delete('/:id', function(req, res) {
     const id = req.params.id
-    databaseHandler.deleteItem(id, function(error) {
+    databaseHandler.deleteTask(id, function(error) {
         if (error) {
             console.error(error)
             res.status(400).send("Failed to delete task!")
         } else {
-            res.status(201).send(new Task(data['Items']))
+            res.status(201).send()
         }
     })
 })

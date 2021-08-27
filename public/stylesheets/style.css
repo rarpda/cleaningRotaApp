@@ -107,7 +107,6 @@ header>h1 {
 tbody>tr:hover {
     color: black;
     background-color: lightgreen;
-    /* transition: color 0.5s linear; */
 }
 
 tbody>tr {
@@ -120,5 +119,4 @@ tbody>tr {
 
 .editable:hover {
     background-color: white;
-    /* vendorless fallback */
 }
